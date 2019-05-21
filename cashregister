@@ -1,0 +1,136 @@
+#include <iostream>
+#include <string> 
+
+/* Standard C++ includes */
+#include <stdlib.h>
+
+/*
+  Include directly the different
+  headers from cppconn/ and mysql_driver.h + mysql_util.h
+  (and mysql_connection.h). This will reduce your build time!
+*/
+#include "mysql_connection.h"
+
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+
+using namespace std;
+
+
+int main(){
+    
+    //init var
+    std::string choice;
+    std::string choice2; 
+    std::string choice3; 
+    int goAgain = 0; 
+    std::string  coupon;
+    double tax = .08;  
+    double taxAmount; 
+    double taxSubtotal; 
+    double total;
+
+    double price = 0; 
+    double price2 = 0;
+
+
+
+
+    cout << endl;
+    cout << "Running SELECT Hello World! »  AS _message..." << endl;
+
+    std::string SKU; 
+    std::string queryStart = "select * from tablename where SKU = "; 
+    std::string queryFormat; 
+
+
+
+    //New code here 
+    try {
+      sql::Driver *driver;
+      sql::Connection *con;
+      sql::Statement *stmt;
+      sql::ResultSet *res;
+
+      /* Create a connection */
+      driver = get_driver_instance();
+      con = driver->connect("tcp://127.0.0.1:3306", "root", "f4th3r0fl1ghts");
+      /* Connect to the MySQL test database */
+      con->setSchema("test");
+
+      stmt = con->createStatement();
+        
+    
+    
+      while( goAgain < 2){
+        std::cout << "Please make a selection:";
+        std::cin >> choice3;
+         res = stmt->executeQuery("select * from tablename where SKU = " + choice3  );
+
+          while (res->next()) {
+            cout << "\t... MySQL replies: ";
+            /* Access column data by alias or column name */
+            cout << res->getString("name") << endl;
+            cout << "\t... MySQL says it again: ";
+            /* Access column fata by numeric offset, 1 is the first column */
+            cout << res->getString("SKU") << endl;
+            cout << res->getString("SKU") << endl;
+            cout << res->getDouble("Price") << "\n"; 
+            price2 = res->getDouble("Price");
+            total = total + price2; 
+            std::cout << "Subtotal: " << total << "\n"; 
+            std::cout << "SQL Loop.\n"; 
+            std::cout << "Select: 1 = Buy another item. 2 = exit and pay\n :"; 
+            
+            std::cin >> goAgain;
+          }
+      }
+
+
+
+
+    std::cout << "Sub total = $" << total << "\n"; 
+ 
+
+    
+
+    //Subtotal 
+    std::cout << "Subtotal: $" << total << "\n"; 
+
+    std::cout << "Coupon? :\n"; 
+    std::cin >> coupon; 
+    if(coupon == "yes"){
+      total = total - (total * .1) ; 
+      std::cout << "Subtotal with coupon inside loop: $" << total << "\n"; 
+    }
+    std::cout << "Subtotal with coupon: $" << total << "\n"; 
+
+    taxAmount = total * tax; 
+    taxSubtotal = total + taxAmount; 
+
+    std::cout << "Subtotl with tax: $" << taxSubtotal << "\n"; 
+
+ delete res;
+  delete stmt;
+  delete con;
+
+
+
+} catch (sql::SQLException &e) {
+  cout << "# ERR: SQLException in " << __FILE__;
+  cout << "(" << __FUNCTION__ << ") on line " 
+     << __LINE__ << endl;
+  cout << "# ERR: " << e.what();
+  cout << " (MySQL error code: " << e.getErrorCode();
+  cout << ", SQLState: " << e.getSQLState() << " )" << endl;
+}
+
+cout << endl;
+
+return EXIT_SUCCESS;
+
+
+  
+} 
